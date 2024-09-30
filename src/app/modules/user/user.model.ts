@@ -8,8 +8,11 @@ const UserSchema = new Schema<TUser>(
     password: { type: String, required: true },
     phone: { type: String, required: true },
     role: { type: String, required: true, enum: ["admin", "user"] },
+    profilePicture: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: Schema.Types.ObjectId, ref: "User" }], 
   },
   { timestamps: true },
 );

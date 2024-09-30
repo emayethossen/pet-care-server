@@ -48,6 +48,7 @@ export const userController = {
         success: true,
         message: "Login successful",
         token,
+        role: user.role,
         data: user,
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,6 +87,43 @@ export const userController = {
     }
   },
 
+  // updateProfile: async (req: Request, res: Response) => {
+  //   try {
+  //     const userId = req.user?._id;
+
+  //     if (!userId) {
+  //       return res.status(401).json({
+  //         success: false,
+  //         message: "Unauthorized",
+  //       });
+  //     }
+
+  //     const updatedData = req.body as Partial<TUser>;
+
+  //     const user = await UserServices.updateUser(userId, updatedData);
+
+  //     if (!user) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         message: "User not found",
+  //       });
+  //     }
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "User profile updated successfully",
+  //       data: user,
+  //     });
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   } catch (err: any) {
+  //     res.status(500).json({
+  //       success: false,
+  //       message: "Internal Server Error",
+  //       errorMessages: [{ path: "", message: err.message }],
+  //     });
+  //   }
+  // },
+
   updateProfile: async (req: Request, res: Response) => {
     try {
       const userId = req.user?._id;
@@ -98,6 +136,11 @@ export const userController = {
       }
 
       const updatedData = req.body as Partial<TUser>;
+
+      // If a file is uploaded for profile picture
+      if (req.file) {
+        updatedData.profilePicture = `/uploads/${req.file.filename}`;
+      }
 
       const user = await UserServices.updateUser(userId, updatedData);
 
@@ -113,7 +156,6 @@ export const userController = {
         message: "User profile updated successfully",
         data: user,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       res.status(500).json({
         success: false,
@@ -160,4 +202,59 @@ export const userController = {
       });
     }
   },
+
+  follow: async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?._id;
+      const { followUserId } = req.body;
+
+      if (!userId || !followUserId) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing user information",
+        });
+      }
+
+      const result = await UserServices.followUser(userId, followUserId);
+
+      res.status(200).json({
+        success: true,
+        message: `You are now following ${result?.name}`,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        errorMessages: [{ path: "", message: err.message }],
+      });
+    }
+  },
+
+  unfollow: async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?._id;
+      const { unfollowUserId } = req.body;
+
+      if (!userId || !unfollowUserId) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing user information",
+        });
+      }
+
+      const result = await UserServices.unfollowUser(userId, unfollowUserId);
+      console.log(result)
+      res.status(200).json({
+        success: true,
+        message: `You have unfollowed ${result}`,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        errorMessages: [{ path: "", message: err.message }],
+      });
+    }
+  },
+
 };

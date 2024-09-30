@@ -5,8 +5,11 @@ export type TUser = {
   password: string;
   phone: string;
   role: "admin" | "user";
+  profilePicture?: string; 
   resetPasswordToken?: string,
   resetPasswordExpires?: Date,
   createdAt?: Date;
   updatedAt?: Date;
+  followers?: string[];
+  following?: string[]; 
 };

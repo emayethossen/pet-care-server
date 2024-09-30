@@ -50,7 +50,7 @@ const requestPasswordReset = async (email: string): Promise<void> => {
   const token = crypto.randomBytes(32).toString("hex");
   user.resetPasswordToken = token;
   user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1-hour expiration
- // 1-hour expiration
+  // 1-hour expiration
   await user.save();
 
   // Send email
@@ -90,6 +90,55 @@ const resetPassword = async (token: string, newPassword: string): Promise<void> 
   await user.save();
 };
 
+const followUser = async (currentUserId: string, followUserId: string): Promise<TUser | null> => {
+  const user = await User.findById(currentUserId);
+  const userToFollow = await User.findById(followUserId);
+
+  if (!user || !userToFollow) throw new Error("User not found");
+
+  // Add to 'following' list if not already present
+  if (!user.following?.includes(followUserId)) {
+    user.following?.push(followUserId);
+  }
+
+  // Add to 'followers' list if not already present
+  if (!userToFollow.followers?.includes(currentUserId)) {
+    userToFollow.followers?.push(currentUserId);
+  }
+
+  await user.save();
+  await userToFollow.save();
+
+  return userToFollow;
+};
+
+const unfollowUser = async (userId: string, unfollowUserId: string): Promise<string | null> => {
+  const user = await User.findById(userId);
+  const unfollowUser = await User.findById(unfollowUserId);
+
+  if (!user || !unfollowUser) {
+    throw new Error("User not found");
+  }
+
+  // Check if user is already following the unfollowUser
+  if (!user?.following?.includes(unfollowUserId)) {
+    throw new Error("You are not following this user");
+  }
+
+  // Remove unfollowUserId from the user's following list
+  await User.findByIdAndUpdate(userId, {
+    $pull: { following: unfollowUserId }
+  });
+
+  // Remove userId from the unfollowUser's followers list
+  await User.findByIdAndUpdate(unfollowUserId, {
+    $pull: { followers: userId }
+  });
+
+  return unfollowUser.name;
+};
+
+
 
 export const UserServices = {
   createUser,
@@ -98,4 +147,6 @@ export const UserServices = {
   updateUser,
   requestPasswordReset,
   resetPassword,
+  followUser,
+  unfollowUser
 };
