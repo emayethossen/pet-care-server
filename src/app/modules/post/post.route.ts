@@ -6,7 +6,7 @@ import {
     getPetStoriesController,
     getPetStoryByCategoryController,
 } from './post.controller';
-import { authMiddleware } from '../../middlewares/auth.middleware'; // importing the middleware
+import { authMiddleware } from '../../middlewares/auth.middleware';
 
 const router = express.Router();
 

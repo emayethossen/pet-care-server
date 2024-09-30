@@ -10,15 +10,6 @@ export const updatePetStory = async (id: string, data: Partial<IPetStory>): Prom
     return PetStory.findByIdAndUpdate(id, data, { new: true });
 };
 
-// export const deletePetStory = async (id: string, userId: string): Promise<IPetStory | null> => {
-//     const story = await PetStory.findById(id);
-//     if (story && story.author.toString() === userId) {
-//         return story.remove();
-//     } else {
-//         throw new Error('Unauthorized');
-//     }
-// };
-
 export const deletePetStory = async (id: string, userId: string): Promise<IPetStory | null> => {
     const story = await PetStory.findById(id);
 
