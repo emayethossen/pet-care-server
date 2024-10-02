@@ -8,6 +8,7 @@ import {
   notFoundHandler,
 } from "./app/middlewares/error.middleware";
 import bodyParser from "body-parser";
+import { CommentRoutes } from "./app/modules/comment/comment.route";
 
 const app: Application = express();
 
@@ -21,6 +22,7 @@ app.use(cors());
 // application routes
 app.use("/api", UserRoutes);
 app.use("/api", PostRoutes);
+app.use("/api", CommentRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");

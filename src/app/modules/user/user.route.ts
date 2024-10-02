@@ -14,12 +14,8 @@ router.post("/auth/login", userController.login);
 // Get Profile
 router.get("/users/me", authMiddleware, userController.getProfile);
 
-// Update Profile
-// router.put("/users/me", authMiddleware, userController.updateProfile);
-
 // Update Profile (with optional profile picture upload)
 router.put("/users/me", authMiddleware, upload.single("profilePicture"), userController.updateProfile);
-
 
 // Forgot Password
 router.post("/auth/forgot-password", userController.forgotPassword);
