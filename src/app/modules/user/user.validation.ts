@@ -14,6 +14,7 @@ const userValidationSchema = z.object({
   role: z.enum(["admin", "user"], {
     message: "Role must be either admin or user",
   }),
+  bio: z.string().optional(),
   profilePicture: z.string().optional(),
 });
 

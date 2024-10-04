@@ -14,6 +14,10 @@ router.post("/auth/login", userController.login);
 // Get Profile
 router.get("/users/me", authMiddleware, userController.getProfile);
 
+// Backend route in user.controller.js
+router.get('/users/:id', userController.getUserById);
+
+
 // Update Profile (with optional profile picture upload)
 router.put("/users/me", authMiddleware, upload.single("profilePicture"), userController.updateProfile);
 
@@ -26,8 +30,14 @@ router.post("/auth/reset-password/:token", userController.resetPassword);
 // Follow User
 router.post("/users/follow", authMiddleware, userController.follow);
 
+router.get("/users/:userId/followers", authMiddleware, userController.getFollowers);
+router.get("/users/:userId/following", authMiddleware, userController.getFollowing);
+
+
 // Unfollow User
 router.post("/users/unfollow", authMiddleware, userController.unfollow);
 
+// Get posts from followed users
+router.get("/users/following-posts", authMiddleware, userController.getFollowingPosts);
 
 export const UserRoutes = router;

@@ -9,6 +9,7 @@ const UserSchema = new Schema<TUser>(
     phone: { type: String, required: true },
     role: { type: String, required: true, enum: ["admin", "user"] },
     profilePicture: { type: String },
+    bio: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],

@@ -84,6 +84,18 @@ export const getPetStoriesController = async (req: Request, res: Response) => {
     }
 };
 
+export const getUserPosts = async (req:Request, res:Response) => {
+    const userId = req.user?._id;  // Extract user ID from the JWT token
+
+    try {
+        const posts = await PetStory.find({ author: userId });  // Fetch posts authored by this user
+        return res.json(posts);
+    } catch (err) {
+        console.error('Error fetching posts:', err);
+        return res.status(500).json({ message: 'Failed to fetch posts' });
+    }
+};
+
 // Get a single pet story
 export const getSinglePetStoryController = async (req: Request, res: Response) => {
     try {

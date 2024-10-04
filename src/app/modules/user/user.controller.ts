@@ -4,6 +4,8 @@ import { userValidation } from "./user.validation";
 import { UserServices } from "./user.service";
 import { TUser } from "./user.interface";
 import config from "../../config";
+import { User } from "./user.model";
+import PetStory from '../post/post.model';
 
 export const userController = {
   signUp: async (req: Request, res: Response) => {
@@ -87,42 +89,19 @@ export const userController = {
     }
   },
 
-  // updateProfile: async (req: Request, res: Response) => {
-  //   try {
-  //     const userId = req.user?._id;
+  getUserById: async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.id;
+      const user = await User.findById(userId); // MongoDB call to fetch user by ID
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  },
 
-  //     if (!userId) {
-  //       return res.status(401).json({
-  //         success: false,
-  //         message: "Unauthorized",
-  //       });
-  //     }
-
-  //     const updatedData = req.body as Partial<TUser>;
-
-  //     const user = await UserServices.updateUser(userId, updatedData);
-
-  //     if (!user) {
-  //       return res.status(404).json({
-  //         success: false,
-  //         message: "User not found",
-  //       });
-  //     }
-
-  //     res.status(200).json({
-  //       success: true,
-  //       message: "User profile updated successfully",
-  //       data: user,
-  //     });
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   } catch (err: any) {
-  //     res.status(500).json({
-  //       success: false,
-  //       message: "Internal Server Error",
-  //       errorMessages: [{ path: "", message: err.message }],
-  //     });
-  //   }
-  // },
 
   updateProfile: async (req: Request, res: Response) => {
     try {
@@ -230,6 +209,49 @@ export const userController = {
     }
   },
 
+
+  getFollowers: async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    try {
+      // Populate the 'followers' field
+      const user = await User.findById(req.user._id).populate('followers', 'name profilePicture');
+
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      // Return the populated followers
+      res.status(200).json({ success: true, data: user.followers });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Unable to fetch followers" });
+    }
+  },
+  getFollowing: async (req: Request, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    try {
+      // Populate the 'followers' field
+      const user = await User.findById(req.user._id).populate('following', 'name profilePicture');
+
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      // Return the populated followers
+      res.status(200).json({ success: true, data: user.followers });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Unable to fetch following" });
+    }
+  },
+
+
   unfollow: async (req: Request, res: Response) => {
     try {
       const userId = req.user?._id;
@@ -256,5 +278,24 @@ export const userController = {
       });
     }
   },
+
+  // Get posts from users the logged-in user is following
+  getFollowingPosts: async (req: Request, res: Response) => {
+    try {
+      const currentUser = await User.findById(req.user?._id).populate("following", "name");
+
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const followingIds = currentUser.following?.map(user => user._id);
+      const posts = await PetStory.find({ author: { $in: followingIds } }); // Assuming you have a 'Post' model
+
+      res.status(200).json(posts);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
+  },
+
 
 };

@@ -10,6 +10,7 @@ import {
     addCommentController,
     getPetStoryWithCommentsController,
     getSinglePetStoryController,
+    getUserPosts,
 } from './post.controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 
@@ -27,6 +28,7 @@ router.post('/posts/:id/comments', authMiddleware, addCommentController); // Add
 // Get a single pet story
 router.get('/posts/:id', getSinglePetStoryController);
 
+router.get('/my-posts', authMiddleware, getUserPosts);
 
 // Public routes
 router.get('/posts', getPetStoriesController);
