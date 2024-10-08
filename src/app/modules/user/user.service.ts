@@ -138,7 +138,23 @@ const unfollowUser = async (userId: string, unfollowUserId: string): Promise<str
   return unfollowUser.name;
 };
 
+const getAllUsers = async (): Promise<TUser[]> => {
+  return User.find();
+};
 
+const promoteUserToAdmin = async (userId: string): Promise<TUser | null> => {
+  const user = await User.findById(userId);
+  if (!user) {
+    return null;
+  }
+  user.role = "admin";
+  return user.save();
+};
+
+const deleteUserById = async (userId: string): Promise<TUser | null> => {
+  const result = await User.findByIdAndDelete(userId);
+  return result;
+};
 
 export const UserServices = {
   createUser,
@@ -148,5 +164,8 @@ export const UserServices = {
   requestPasswordReset,
   resetPassword,
   followUser,
-  unfollowUser
+  unfollowUser,
+  getAllUsers,
+  promoteUserToAdmin,
+  deleteUserById
 };

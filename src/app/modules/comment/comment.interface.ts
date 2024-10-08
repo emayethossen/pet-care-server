@@ -1,8 +1,9 @@
 import { Document } from 'mongoose';
+import mongoose from 'mongoose';
 
 export interface IComment extends Document {
     content: string;
-    author: string; // ObjectId referring to the User
-    story: string; // ObjectId referring to the PetStory
+    author: mongoose.Types.ObjectId; // Change this to ObjectId
+    story: mongoose.Types.ObjectId; // Change this to ObjectId
     createdAt: Date;
 }

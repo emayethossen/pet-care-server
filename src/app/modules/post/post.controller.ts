@@ -1,16 +1,18 @@
 import { Request, Response } from 'express';
 import { IPetStory } from './post.interface';
 import PetStory from './post.model';
-import { addCommentToPetStory, createPetStory, deletePetStory, downvotePetStory, getPetStories, getPetStoryByCategory, getSinglePost, updatePetStory, upvotePetStory } from './post.service';
+import { createPetStory, deletePetStory, downvotePetStory, getPetStories, getPetStoryByCategory, getSinglePost, updatePetStory, upvotePetStory } from './post.service';
+import Payment from '../payments/payment.model'
 
 export const createPetStoryController = async (req: Request, res: Response) => {
     try {
-        const { title, content, category, images } = req.body;
+        const { title, content, category, coverImage, isPremium } = req.body;
         const storyData: Partial<IPetStory> = {
             title,
             content,
             category,
-            images,
+            coverImage,
+            isPremium,
             author: req.user?._id,
         };
 
@@ -84,7 +86,7 @@ export const getPetStoriesController = async (req: Request, res: Response) => {
     }
 };
 
-export const getUserPosts = async (req:Request, res:Response) => {
+export const getUserPosts = async (req: Request, res: Response) => {
     const userId = req.user?._id;  // Extract user ID from the JWT token
 
     try {
@@ -130,24 +132,14 @@ export const getPetStoryByCategoryController = async (req: Request, res: Respons
 
 // Upvote a story
 export const upvotePetStoryController = async (req: Request, res: Response) => {
-    try {
-        const story = await upvotePetStory(req.params.id);
-        res.json(story);
-    } catch (error: any) {
-        res.status(500).json({ message: 'Error upvoting story', error: error.message });
-    }
 };
 
 // Downvote a story
 export const downvotePetStoryController = async (req: Request, res: Response) => {
-    try {
-        const story = await downvotePetStory(req.params.id);
-        res.json(story);
-    } catch (error: any) {
-        res.status(500).json({ message: 'Error downvoting story', error: error.message });
-    }
 };
 
+
+// Get pet story with comments
 export const getPetStoryWithCommentsController = async (req: Request, res: Response) => {
     try {
         const story = await PetStory.findById(req.params.id)
@@ -174,15 +166,52 @@ export const getPetStoryWithCommentsController = async (req: Request, res: Respo
     }
 };
 
+// Fetch premium content by postId and verify payment
+export const getPremiumContent = async (req: Request, res: Response) => {
+    const { postId } = req.params;
+    const userId = req.user?._id; // Assuming you have `req.user` from the auth middleware
 
-// Add comment to a story
-export const addCommentController = async (req: Request, res: Response) => {
     try {
-        const commentId = req.body.commentId; // Assume the comment is created beforehand
-        const story = await addCommentToPetStory(req.params.id, commentId);
-        res.json(story);
-    } catch (error: any) {
-        res.status(500).json({ message: 'Error adding comment to story', error: error.message });
+        // Find the post by ID
+        const post = await PetStory.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        // Check if the content is premium
+        if (!post.isPremium) {
+            return res.status(200).json({ data: post });
+        }
+
+        // If content is premium, check if the user has paid for it
+        const hasAccess = await Payment.findOne({
+            userId,
+            postId,
+            status: 'succeeded', // Only allow access if payment succeeded
+        });
+
+        if (!hasAccess) {
+            return res.status(403).json({ message: "Access denied. Please make payment to access premium content." });
+        }
+
+        // If payment is verified, return the premium content
+        res.status(200).json({ data: post });
+    } catch (error) {
+        console.error('Error fetching premium content:', error);
+        res.status(500).json({ message: "Error fetching premium content" });
     }
 };
 
+// Fetch all content
+export const getAllUserContentController = async (req: Request, res: Response) => {
+    try {
+        const stories = await PetStory.find()
+            .populate('author', 'name email') // Populate author information
+            .sort({ createdAt: -1 }); // Sort by creation date
+
+        res.status(200).json({ message: 'Fetched all user content successfully.', data: stories });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Failed to fetch user content.', error: error.message });
+    }
+};

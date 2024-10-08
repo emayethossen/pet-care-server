@@ -102,7 +102,6 @@ export const userController = {
     }
   },
 
-
   updateProfile: async (req: Request, res: Response) => {
     try {
       const userId = req.user?._id;
@@ -114,11 +113,11 @@ export const userController = {
         });
       }
 
-      const updatedData = req.body as Partial<TUser>;
+      const updatedData: Partial<TUser> = req.body;
 
-      // If a file is uploaded for profile picture
-      if (req.file) {
-        updatedData.profilePicture = `/uploads/${req.file.filename}`;
+      // Check if an image URL is provided in the request body
+      if (req.body.profilePicture) {
+        updatedData.profilePicture = req.body.profilePicture; // Expecting a string URL
       }
 
       const user = await UserServices.updateUser(userId, updatedData);
@@ -143,6 +142,7 @@ export const userController = {
       });
     }
   },
+
 
   forgotPassword: async (req: Request, res: Response) => {
     try {
@@ -297,5 +297,92 @@ export const userController = {
     }
   },
 
+  checkPremiumAccess: async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?._id;  // Assuming auth middleware attaches the user object
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      // Return premium access status with success = true
+      return res.status(200).json({
+        success: true,
+        hasPremiumAccess: user.hasPremiumAccess,
+      });
+    } catch (error) {
+      console.error('Error checking premium access:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  },
+
+  getAllUsers: async (req: Request, res: Response) => {
+    try {
+      const users = await UserServices.getAllUsers();
+      res.status(200).json({
+        success: true,
+        message: "Users retrieved successfully",
+        data: users,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        errorMessages: [{ path: "", message: err.message }],
+      });
+    }
+  },
+
+  promoteUserToAdmin: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const user = await UserServices.promoteUserToAdmin(id);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User promoted to admin successfully",
+        data: user,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        errorMessages: [{ path: "", message: err.message }],
+      });
+    }
+  },
+
+  deleteUser: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const result = await UserServices.deleteUserById(id);
+
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        errorMessages: [{ path: "", message: err.message }],
+      });
+    }
+  },
 
 };

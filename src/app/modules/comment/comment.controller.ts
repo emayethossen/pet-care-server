@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Comment from './comment.model';
-import PetStory from '../post/post.model'; 
+import PetStory from '../post/post.model';
 
 export const createCommentController = async (req: Request, res: Response) => {
     try {
@@ -37,26 +37,6 @@ export const createCommentController = async (req: Request, res: Response) => {
     }
 };
 
-
-
-// Get all comments for a specific post
-export const getCommentsByPostController = async (req: Request, res: Response) => {
-    try {
-        const { postId } = req.params;
-        const comments = await Comment.find({ postId }).populate('userId', 'username');
-        res.status(200).json({
-            success: true,
-            data: comments,
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching comments',
-            error: error.message,
-        });
-    }
-};
-
 // Update a comment
 export const updateCommentController = async (req: Request, res: Response) => {
     try {
@@ -73,7 +53,8 @@ export const updateCommentController = async (req: Request, res: Response) => {
             });
         }
 
-        if (comment.userId.toString() !== userId) {
+        // Access the correct property here
+        if (comment.author.toString() !== userId?.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Unauthorized to update this comment',
@@ -112,7 +93,8 @@ export const deleteCommentController = async (req: Request, res: Response) => {
             });
         }
 
-        if (comment.userId.toString() !== userId) {
+        // Access the correct property here
+        if (comment.author.toString() !== userId?.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'Unauthorized to delete this comment',
@@ -129,6 +111,24 @@ export const deleteCommentController = async (req: Request, res: Response) => {
         res.status(500).json({
             success: false,
             message: 'Error deleting comment',
+            error: error.message,
+        });
+    }
+};
+
+// Get all comments for a specific post
+export const getCommentsByPostController = async (req: Request, res: Response) => {
+    try {
+        const { postId } = req.params;
+        const comments = await Comment.find({ story: postId }).populate('author', 'username'); // Update here
+        res.status(200).json({
+            success: true,
+            data: comments,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching comments',
             error: error.message,
         });
     }

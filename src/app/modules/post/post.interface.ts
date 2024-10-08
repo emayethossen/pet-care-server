@@ -5,11 +5,10 @@ export interface IPetStory extends Document {
     content: string;
     author: string; // ObjectId referring to the User
     category: 'Tip' | 'Story';
-    images: string[];
+    coverImage: string;
     isPremium?: boolean; // For monetization
     upvotes: number; // To store upvotes
     downvotes: number;
-    comments: mongoose.Types.ObjectId[]; // To store downvotes
-    // comments: string[]; // Array of Comment ObjectIds
+    comments: mongoose.Types.ObjectId[];
     createdAt: Date;
 }

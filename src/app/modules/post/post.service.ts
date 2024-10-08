@@ -52,6 +52,7 @@ export const downvotePetStory = async (id: string): Promise<IPetStory | null> =>
     return PetStory.findByIdAndUpdate(id, { $inc: { downvotes: 1 } }, { new: true });
 };
 
+
 // Add comment to a pet story
 export const addCommentToPetStory = async (id: string, commentId: string): Promise<IPetStory | null> => {
     return PetStory.findByIdAndUpdate(id, { $push: { comments: commentId } }, { new: true });

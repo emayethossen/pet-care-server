@@ -13,4 +13,5 @@ export type TUser = {
   updatedAt?: Date;
   followers?: string[];
   following?: string[]; 
+  hasPremiumAccess?: Boolean,
 };

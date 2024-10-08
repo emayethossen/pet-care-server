@@ -6,7 +6,7 @@ const PetStorySchema: Schema = new Schema({
     content: { type: String, required: true },
     author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     category: { type: String, enum: ['Tip', 'Story'], required: true },
-    images: { type: [String], default: [] },
+    coverImage: { type: String, required: true },
     isPremium: { type: Boolean, default: false }, // Premium content flag
     upvotes: { type: Number, default: 0 }, // Upvotes count
     downvotes: { type: Number, default: 0 }, // Downvotes count

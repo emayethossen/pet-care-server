@@ -14,6 +14,7 @@ const UserSchema = new Schema<TUser>(
     resetPasswordExpires: { type: Date },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }], 
+    hasPremiumAccess: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

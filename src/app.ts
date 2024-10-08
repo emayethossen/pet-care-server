@@ -9,20 +9,24 @@ import {
 } from "./app/middlewares/error.middleware";
 import bodyParser from "body-parser";
 import { CommentRoutes } from "./app/modules/comment/comment.route";
+import { PaymentRoutes } from "./app/modules/payments/payment.route";
 
 const app: Application = express();
 
 // parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '1mb' })); // Set to 1MB
+app.use(bodyParser.urlencoded({ limit: '1mb', extended: true })); 
 app.use(cors());
-// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 // application routes
 app.use("/api", UserRoutes);
 app.use("/api", PostRoutes);
 app.use("/api", CommentRoutes);
+app.use("/api", PaymentRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
