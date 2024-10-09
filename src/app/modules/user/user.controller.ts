@@ -148,7 +148,6 @@ export const userController = {
     try {
       const { email } = req.body;
       await UserServices.requestPasswordReset(email);
-
       res.status(200).json({
         success: true,
         message: "Password reset link sent to your email.",
@@ -161,14 +160,15 @@ export const userController = {
       });
     }
   },
-
+  
   resetPassword: async (req: Request, res: Response) => {
     try {
       const { token } = req.params;
       const { password } = req.body;
-
+  
+      // You may want to add validation for the new password here
+  
       await UserServices.resetPassword(token, password);
-
       res.status(200).json({
         success: true,
         message: "Password reset successfully.",
@@ -181,6 +181,7 @@ export const userController = {
       });
     }
   },
+  
 
   follow: async (req: Request, res: Response) => {
     try {

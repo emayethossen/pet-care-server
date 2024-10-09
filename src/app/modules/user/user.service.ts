@@ -50,7 +50,6 @@ const requestPasswordReset = async (email: string): Promise<void> => {
   const token = crypto.randomBytes(32).toString("hex");
   user.resetPasswordToken = token;
   user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1-hour expiration
-  // 1-hour expiration
   await user.save();
 
   // Send email
@@ -82,6 +81,7 @@ const resetPassword = async (token: string, newPassword: string): Promise<void> 
 
   if (!user) throw new Error("Invalid or expired token");
 
+  // Validate the new password before hashing (length, complexity, etc.)
   const hashedPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
   user.password = hashedPassword;
   user.resetPasswordToken = undefined;
@@ -89,6 +89,7 @@ const resetPassword = async (token: string, newPassword: string): Promise<void> 
 
   await user.save();
 };
+
 
 const followUser = async (currentUserId: string, followUserId: string): Promise<TUser | null> => {
   const user = await User.findById(currentUserId);

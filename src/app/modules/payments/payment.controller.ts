@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import Payment from './payment.model'; // Your Payment model
 import PetStory from '../post/post.model'; // Update the path to your PetStory model
 import { TUser } from '../user/user.interface';
+import { getAllPayments } from './payment.service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2022-11-15',
@@ -50,7 +51,7 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
         return res.status(200).json({
             clientSecret: paymentIntent.client_secret,
         });
-    } catch (error:any) {
+    } catch (error: any) {
         return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
@@ -90,5 +91,18 @@ export const savePayment = async (req: Request, res: Response) => {
         }
     } catch (error: any) {
         return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+// Adjust the import according to your structure
+
+// Controller to fetch all payments
+export const fetchAllPayments = async (req: Request, res: Response) => {
+    try {
+        const payments = await getAllPayments();
+        return res.status(200).json(payments);
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
