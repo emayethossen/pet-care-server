@@ -1,6 +1,5 @@
-import Payment from './payment.model'
-
+import Payment from "./payment.model";
 
 export const getAllPayments = async () => {
-    return await Payment.find().populate('userId postId').sort({ createdAt: -1 });
+  return await Payment.find().populate("userId postId").sort({ createdAt: -1 });
 };

@@ -13,7 +13,7 @@ const UserSchema = new Schema<TUser>(
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: Schema.Types.ObjectId, ref: "User" }], 
+    following: [{ type: Schema.Types.ObjectId, ref: "User" }],
     hasPremiumAccess: { type: Boolean, default: false },
   },
   { timestamps: true },

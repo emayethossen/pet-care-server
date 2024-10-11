@@ -27,5 +27,5 @@ const passwordResetValidationSchema = z.object({
 
 export const userValidation = {
   userValidationSchema,
-  passwordResetValidationSchema
+  passwordResetValidationSchema,
 };

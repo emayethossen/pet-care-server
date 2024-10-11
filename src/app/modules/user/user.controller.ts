@@ -5,7 +5,7 @@ import { UserServices } from "./user.service";
 import { TUser } from "./user.interface";
 import config from "../../config";
 import { User } from "./user.model";
-import PetStory from '../post/post.model';
+import PetStory from "../post/post.model";
 
 export const userController = {
   signUp: async (req: Request, res: Response) => {
@@ -94,11 +94,13 @@ export const userController = {
       const userId = req.params.id;
       const user = await User.findById(userId); // MongoDB call to fetch user by ID
       if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
       res.status(200).json({ success: true, data: user });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Server error' });
+      res.status(500).json({ success: false, message: "Server error" });
     }
   },
 
@@ -143,7 +145,6 @@ export const userController = {
     }
   },
 
-
   forgotPassword: async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
@@ -160,14 +161,14 @@ export const userController = {
       });
     }
   },
-  
+
   resetPassword: async (req: Request, res: Response) => {
     try {
       const { token } = req.params;
       const { password } = req.body;
-  
+
       // You may want to add validation for the new password here
-  
+
       await UserServices.resetPassword(token, password);
       res.status(200).json({
         success: true,
@@ -181,7 +182,6 @@ export const userController = {
       });
     }
   },
-  
 
   follow: async (req: Request, res: Response) => {
     try {
@@ -210,48 +210,64 @@ export const userController = {
     }
   },
 
-
   getFollowers: async (req: Request, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "User not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not authenticated" });
     }
 
     try {
       // Populate the 'followers' field
-      const user = await User.findById(req.user._id).populate('followers', 'name profilePicture');
+      const user = await User.findById(req.user._id).populate(
+        "followers",
+        "name profilePicture",
+      );
 
       if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       // Return the populated followers
       res.status(200).json({ success: true, data: user.followers });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: "Unable to fetch followers" });
+      res
+        .status(500)
+        .json({ success: false, message: "Unable to fetch followers" });
     }
   },
   getFollowing: async (req: Request, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "User not authenticated" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User not authenticated" });
     }
 
     try {
       // Populate the 'followers' field
-      const user = await User.findById(req.user._id).populate('following', 'name profilePicture');
+      const user = await User.findById(req.user._id).populate(
+        "following",
+        "name profilePicture",
+      );
 
       if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       // Return the populated followers
       res.status(200).json({ success: true, data: user.followers });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: "Unable to fetch following" });
+      res
+        .status(500)
+        .json({ success: false, message: "Unable to fetch following" });
     }
   },
-
 
   unfollow: async (req: Request, res: Response) => {
     try {
@@ -266,7 +282,7 @@ export const userController = {
       }
 
       const result = await UserServices.unfollowUser(userId, unfollowUserId);
-      console.log(result)
+      console.log(result);
       res.status(200).json({
         success: true,
         message: `You have unfollowed ${result}`,
@@ -283,28 +299,64 @@ export const userController = {
   // Get posts from users the logged-in user is following
   getFollowingPosts: async (req: Request, res: Response) => {
     try {
-      const currentUser = await User.findById(req.user?._id).populate("following", "name");
-
+      // Find the current user and populate the following field with user objects
+      const currentUser = await User.findById(req.user?._id)
+        .populate({
+          path: 'following',    // Path to populate
+          select: '_id name',   // Only selecting _id and name of the followed users
+        })
+        .exec();
+  
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      const followingIds = currentUser.following?.map(user => user._id);
-      const posts = await PetStory.find({ author: { $in: followingIds } }); // Assuming you have a 'Post' model
-
+  
+      // Log the populated following field to check the output
+      console.log('Populated following field:', currentUser.following);
+  
+      // Ensure currentUser.following is an array and map through it safely
+      if (!Array.isArray(currentUser.following) || currentUser.following.length === 0) {
+        return res.status(200).json([]);  // Return empty array if the user follows no one
+      }
+  
+      // Extract the IDs of followed users
+      const followingIds = currentUser.following.map((user: any) => {
+        if (user._id) {
+          return user._id;
+        } else {
+          console.error('Error: Following user does not have _id:', user);
+          return null;  // Handle the case where _id is missing
+        }
+      }).filter(Boolean); // Filter out any null/undefined values
+  
+      console.log('Following user IDs:', followingIds);
+  
+      // If there are no valid followingIds, return an empty array
+      if (followingIds.length === 0) {
+        return res.status(200).json([]);
+      }
+  
+      // Find posts authored by users the current user is following
+      const posts = await PetStory.find({ author: { $in: followingIds } }).exec();
+  
+      console.log('Posts found:', posts);
+  
       res.status(200).json(posts);
     } catch (error) {
+      console.error("Error fetching posts:", error);
       res.status(500).json({ message: "Server error", error });
     }
   },
-
+  
   checkPremiumAccess: async (req: Request, res: Response) => {
     try {
-      const userId = req.user?._id;  // Assuming auth middleware attaches the user object
+      const userId = req.user?._id; // Assuming auth middleware attaches the user object
       const user = await User.findById(userId);
 
       if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       // Return premium access status with success = true
@@ -313,8 +365,10 @@ export const userController = {
         hasPremiumAccess: user.hasPremiumAccess,
       });
     } catch (error) {
-      console.error('Error checking premium access:', error);
-      return res.status(500).json({ success: false, message: 'Internal server error' });
+      console.error("Error checking premium access:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
   },
 
@@ -385,5 +439,4 @@ export const userController = {
       });
     }
   },
-
 };

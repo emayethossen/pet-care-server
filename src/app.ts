@@ -17,8 +17,8 @@ const app: Application = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
-app.use(bodyParser.json({ limit: '1mb' })); // Set to 1MB
-app.use(bodyParser.urlencoded({ limit: '1mb', extended: true })); 
+app.use(bodyParser.json({ limit: "1mb" })); // Set to 1MB
+app.use(bodyParser.urlencoded({ limit: "1mb", extended: true }));
 app.use(cors());
 // app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 

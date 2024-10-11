@@ -3,15 +3,15 @@ export type TUser = {
   name: string;
   email: string;
   password: string;
-  bio?:string,
+  bio?: string;
   phone: string;
   role: "admin" | "user";
-  profilePicture?: string; 
-  resetPasswordToken?: string,
-  resetPasswordExpires?: Date,
+  profilePicture?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt?: Date;
   updatedAt?: Date;
   followers?: string[];
-  following?: string[]; 
-  hasPremiumAccess?: Boolean,
+  following?: string[];
+  hasPremiumAccess?: boolean;
 };
