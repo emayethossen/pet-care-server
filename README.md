@@ -2,6 +2,8 @@
 
 This is the backend service for the **Pet Care Tips & Stories** web application. It handles API requests, manages user authentication, stores data using MongoDB, and integrates with payment gateways for premium content.
 
+#live link: https://pet-care-server-ruby.vercel.app/
+
 ## Table of Contents
 - [Tech Stack](#tech-stack)
 - [Features](#features)
@@ -53,8 +55,8 @@ Make sure you have the following installed:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/pet-care-backend.git
-   cd pet-care-backend
+   git clone https://github.com/emayethossen/pet-care-server.git
+   cd pet-care-server
 Install the dependencies:
 
 bash
